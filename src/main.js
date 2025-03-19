@@ -1,24 +1,48 @@
 import './style.css';
-import javascriptLogo from './javascript.svg';
-import viteLogo from '/vite.svg';
-import { setupCounter } from './counter.js';
+import Swiper from 'swiper';
+import 'swiper/swiper-bundle.css';
+import { Navigation, Pagination } from 'swiper/modules';
+import { apiKey } from './secret.js';
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`;
+new Swiper('.swiper', {
+  modules: [Navigation, Pagination],
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+  pagination: {
+    el: '.swiper-pagination',
+    clickable: true,
+  },
+  loop: true,
+});
 
-setupCounter(document.querySelector('#counter'));
+const cities = document.querySelectorAll('.swiper-slide');
+const weatherApiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+const units = 'metric';
+
+async function getWeather(city) {
+  const response = await fetch(
+    `${weatherApiUrl}?q=${city}&units=${units}&appid=${apiKey}`
+  );
+  if (!response.ok) {
+    throw new Error(`Error fetching weather data: ${response.statusText}`);
+  }
+  const data = await response.json();
+  return data;
+}
+
+async function updateWeather() {
+  for (const cityElement of cities) {
+    const cityName = cityElement.getAttribute('data-city');
+    try {
+      const weatherData = await getWeather(cityName);
+      const tempElement = cityElement.querySelector('.temp');
+      tempElement.textContent = `${Math.round(weatherData.main.temp)}°C`;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+updateWeather();
