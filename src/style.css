@@ -12,7 +12,7 @@ html {
 
 .swiper {
   width: 100%;
-  height: 500px;
+  height: 200px;
 }
 
 .swiper .swiper-slide {
@@ -27,5 +27,5 @@ html {
 .swiper .swiper-slide .temp {
   font-size: 18px;
   margin-left: 8px;
-  margin-top: 14px;
+  margin-top: 11px;
 }
