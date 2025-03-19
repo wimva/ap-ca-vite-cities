@@ -6,8 +6,7 @@ import { apiKey } from './secret.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-// Initialize Swiper and keep a reference.
-const swiper = new Swiper('.swiper', {
+new Swiper('.swiper', {
   modules: [Navigation, Pagination],
   navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
   pagination: { el: '.swiper-pagination', clickable: true },
@@ -45,10 +44,10 @@ function createLabelSprite(text) {
   context.font = `Bold ${fontSize}px Arial`;
   const metrics = context.measureText(text);
   const textWidth = metrics.width;
-  // Set canvas dimensions based on text size
+  // Set canvas dimensions based on text size.
   canvas.width = textWidth;
   canvas.height = fontSize * 1.2;
-  // Reapply font after resizing canvas.
+  // Reapply font after changing canvas size.
   context.font = `${fontSize}px Arial`;
   context.fillStyle = 'white';
   context.fillText(text, 0, fontSize);
@@ -60,7 +59,7 @@ function createLabelSprite(text) {
     transparent: true,
   });
   const sprite = new THREE.Sprite(spriteMaterial);
-  // Adjust sprite scale based on canvas dimensions.
+  // Adjust sprite scale based on canvas dimensions (tweak these values as needed)
   sprite.scale.set(2, 0.5, 0.5);
   return sprite;
 }
@@ -118,22 +117,20 @@ async function updateWeatherAndPins() {
       const pinMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const pinMesh = new THREE.Mesh(pinGeometry, pinMaterial);
       pinMesh.position.copy(pinPosition);
-      // Store the city name so we can reference it later.
-      pinMesh.userData.city = cityName;
 
       // Create the label sprite.
       const labelText = `${cityName}: ${roundedTemp}°C`;
       const labelSprite = createLabelSprite(labelText);
-      // Compute an offset based on the pin's outward direction.
-      const offset = new THREE.Vector3()
-        .copy(pinMesh.position)
-        .normalize()
-        .multiplyScalar(0.6);
-      labelSprite.position.copy(offset);
+      // Position the label: if the pin is in the southern hemisphere, offset downward; otherwise upward.
+      if (pinMesh.position.y < 0) {
+        labelSprite.position.set(0, -0.6, 0);
+      } else {
+        labelSprite.position.set(0, 0.6, 0);
+      }
       // Add the label sprite to the pin.
       pinMesh.add(labelSprite);
 
-      // Attach the pin (with its label) to the globe so it rotates together.
+      // Add the pin (with its label) to the globe so it rotates together.
       globe.add(pinMesh);
       pins.push(pinMesh);
     } catch (error) {
@@ -143,23 +140,6 @@ async function updateWeatherAndPins() {
 }
 
 updateWeatherAndPins();
-
-// ----- Centering on Active City on Slide Change -----
-swiper.on('slideChange', () => {
-  // Get the active slide's city name.
-  const activeSlide = swiper.slides[swiper.activeIndex];
-  const activeCity = activeSlide.getAttribute('data-city');
-  // Find the corresponding pin.
-  const activePin = pins.find((pin) => pin.userData.city === activeCity);
-  if (activePin) {
-    // Compute the active pin's world position.
-    const worldPos = new THREE.Vector3();
-    activePin.getWorldPosition(worldPos);
-    // Update the OrbitControls target to center on the active city.
-    controls.target.copy(worldPos);
-    // Optionally, adjust the camera position (or animate the transition) here.
-  }
-});
 
 // ----- Animation Loop -----
 function animate() {
