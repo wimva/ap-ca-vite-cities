@@ -1,5 +1,4 @@
 :root {
-  --swiper-theme-color: #ff0000;
   --swiper-navigation-color: #fff;
   --swiper-pagination-color: #fff;
 }
@@ -17,7 +16,7 @@ html {
 }
 
 .swiper .swiper-slide {
-  background: #555500;
+  background: #192d51;
   display: flex;
   justify-content: center;
   align-items: center;
