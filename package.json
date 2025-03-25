@@ -29,5 +29,8 @@
   "dependencies": {
     "swiper": "^11.2.6",
     "three": "^0.174.0"
+  },
+  "volta": {
+    "node": "22.14.0"
   }
 }
